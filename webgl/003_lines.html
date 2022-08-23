@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./glMatrix-0.9.6.min.js"></script>
+    <script>
+        let webgl;
+         // 投影矩阵
+        let projMat4 = mat4.create();
+        // 定点着色器
+        let vertexString = `
+        attribute vec4 a_position;
+        uniform mat4 proj;
+        void main() {
+            gl_Position =  proj * a_position;
+            gl_PointSize = 60.0;
+        }
+        `;
+        // 片着色器
+        let fragmentString = `
+        void main() {
+            gl_FragColor = vec4(1.0, 0, 1.0, 1.0);
+        }
+        `;
+        const points = []
+        function init() {
+            initWebgl()
+            initShader()
+            initBuffer()
+            draw()
+        }
+        function initWebgl() {
+            let webglDiv = document.getElementById("webglCanvas")
+            webgl = webglDiv.getContext("webgl");
+            webgl.viewport(0, 0, webglDiv.clientWidth, webglDiv.clientHeight);
+            mat4.ortho(0, webglDiv.clientWidth, webglDiv.clientHeight, 0, -1, 1, projMat4);
+        }
+        function initShader() {
+            let vsshader = webgl.createShader(webgl.VERTEX_SHADER);
+            let fsshader = webgl.createShader(webgl.FRAGMENT_SHADER);
+
+            webgl.shaderSource(vsshader, vertexString);
+            webgl.shaderSource(fsshader, fragmentString);
+
+            webgl.compileShader(vsshader);
+            webgl.compileShader(fsshader);
+
+            let program = webgl.createProgram();
+
+            webgl.attachShader(program, vsshader);
+            webgl.attachShader(program, fsshader);
+
+            webgl.linkProgram(program);
+            webgl.useProgram(program);
+
+            webgl.program = program;
+        }
+        function initBuffer() {
+            let arr = [
+                100.0, 100.0, 0, 1.0,
+                200.0, 200.0, 0, 1.0,
+                300.0, 200.0, 0, 1.0,
+                400.0, 600.0, 0, 1.0
+            ]
+            let pointPosition = new Float32Array(arr); // x y z w
+            let aPosition = webgl.getAttribLocation(webgl.program, "a_position");
+
+            // webgl.vertexAttrib4fv(aPosition, pointPosition); 
+            let lineBuffer = webgl.createBuffer();
+            webgl.bindBuffer(webgl.ARRAY_BUFFER, lineBuffer);
+            webgl.bufferData(webgl.ARRAY_BUFFER, pointPosition, webgl.STATIC_DRAW);
+            webgl.enableVertexAttribArray(aPosition);
+            webgl.vertexAttribPointer(aPosition, 4, webgl.FLOAT, false, 4 * 4, 0 * 4);
+
+            let uniformproj = webgl.getUniformLocation(webgl.program, "proj");
+            webgl.uniformMatrix4fv(uniformproj, false, projMat4);
+        }
+        function draw() {
+            webgl.clearColor(0.0, 0.0, 0.0, 1.0);
+            webgl.clear(webgl.COLOR_BUFFER_BIT);
+            webgl.drawArrays(webgl.LINE_LOOP, 0, 4)
+        }
+    </script>
+</head>
+<body onload="init()">
+    <canvas id="webglCanvas" width="1024" height="768"></canvas>
+</body>
+</html>
