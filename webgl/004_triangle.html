@@ -81,9 +81,9 @@
         function draw() {
             webgl.clearColor(0.0, 0.0, 0.0, 1.0);
             webgl.clear(webgl.COLOR_BUFFER_BIT);
-            // webgl.drawArrays(webgl.LINES, 0, 2)
-            // webgl.drawArrays(webgl.LINE_STRIP, 0, 4)
-            webgl.drawArrays(webgl.LINE_LOOP, 0, 4)
+            // webgl.drawArrays(webgl.TRIANGLES, 0, 3)
+            // webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4)
+            webgl.drawArrays(webgl.TRIANGLE_FAN, 0, 4)
         }
     </script>
 </head>

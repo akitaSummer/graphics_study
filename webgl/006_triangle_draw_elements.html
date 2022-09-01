@@ -59,11 +59,17 @@
             webgl.program = program;
         }
         function initBuffer() {
+            let arrIndex = [
+                0, 1, 2,
+                0, 3, 4
+            ]
             let arr = [
                 100.0, 100.0, 0, 1.0,
                 200.0, 200.0, 0, 1.0,
                 300.0, 200.0, 0, 1.0,
-                400.0, 600.0, 0, 1.0
+
+                400.0, 600.0, 0, 1.0,
+                500.0, 700.0, 0, 1.0
             ]
             let pointPosition = new Float32Array(arr); // x y z w
             let aPosition = webgl.getAttribLocation(webgl.program, "a_position");
@@ -75,15 +81,18 @@
             webgl.enableVertexAttribArray(aPosition);
             webgl.vertexAttribPointer(aPosition, 4, webgl.FLOAT, false, 4 * 4, 0 * 4);
 
+            let indexArr = new Uint16Array(arrIndex);
+            let indexBuffer = webgl.createBuffer();
+            webgl.bindBuffer(webgl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+            webgl.bufferData(webgl.ELEMENT_ARRAY_BUFFER, indexArr, webgl.STATIC_DRAW);
+
             let uniformproj = webgl.getUniformLocation(webgl.program, "proj");
             webgl.uniformMatrix4fv(uniformproj, false, projMat4);
         }
         function draw() {
             webgl.clearColor(0.0, 0.0, 0.0, 1.0);
             webgl.clear(webgl.COLOR_BUFFER_BIT);
-            // webgl.drawArrays(webgl.LINES, 0, 2)
-            // webgl.drawArrays(webgl.LINE_STRIP, 0, 4)
-            webgl.drawArrays(webgl.LINE_LOOP, 0, 4)
+            webgl.drawElements(webgl.TRIANGLES, 6, webgl.UNSIGNED_SHORT, 0)
         }
     </script>
 </head>
