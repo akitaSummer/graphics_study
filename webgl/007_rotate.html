@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script src="./glMatrix-0.9.6.min.js"></script>
+  <script>
+    let webgl;
+    let projMat4 = mat4.create();
+    // 定点着色器
+    let vertexString = `
+        attribute vec3 a_position;
+        uniform float angle;
+        void main() {
+            gl_Position =  vec4(a_position.x * cos(angle) - a_position.y * sin(angle), a_position.x * sin(angle) + a_position.y * cos(angle), 0, 1.0);
+        }
+        `;
+    // 片着色器
+    let fragmentString = `
+        void main() {
+            gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+        }
+        `;
+
+    function init() {
+      initWebgl();
+      initShader();
+      initBuffer();
+      draw();
+    }
+
+    function initWebgl() {
+      let webglDiv = document.getElementById("webgl_canvas");
+      webgl = webglDiv.getContext("webgl");
+      webgl.viewport(0, 0, webglDiv.clientWidth, webglDiv.clientHeight);
+    }
+
+    function initShader() {
+      let vsshader = webgl.createShader(webgl.VERTEX_SHADER);
+      let fsshader = webgl.createShader(webgl.FRAGMENT_SHADER);
+
+      // 绑定shader
+      webgl.shaderSource(vsshader, vertexString);
+      webgl.shaderSource(fsshader, fragmentString);
+
+      // 编译shader
+      webgl.compileShader(vsshader);
+      webgl.compileShader(fsshader);
+
+      // 创建项目
+      let program = webgl.createProgram();
+
+      webgl.attachShader(program, vsshader);
+      webgl.attachShader(program, fsshader);
+
+      webgl.linkProgram(program);
+      webgl.useProgram(program);
+
+      webgl.program = program;
+    }
+
+    function initBuffer() {
+      let arr = [0.1, 0.4, 0, 0.1, 0.5, 0, 0.2, 0.4, 0];
+      let float = new Float32Array(arr);
+      // 创建buffer
+      let buffer = webgl.createBuffer();
+      // 绑定buffer
+      webgl.bindBuffer(webgl.ARRAY_BUFFER, buffer);
+      // 绑定数据
+      webgl.bufferData(webgl.ARRAY_BUFFER, float, webgl.STATIC_DRAW);
+
+      // 获取变量
+      let aPosition = webgl.getAttribLocation(webgl.program, "a_position");
+
+      // 设置值
+      webgl.vertexAttribPointer(aPosition, 3, webgl.FLOAT, false, 0, 0);
+      // 激活得到值
+      webgl.enableVertexAttribArray(aPosition);
+
+      let uAngle = webgl.getUniformLocation(webgl.program, "angle");
+      let angle = (90 * Math.PI) / 180;
+      webgl.uniform1f(uAngle, angle); // 1f: 赋值一个float 弧度
+    }
+    function draw() {
+      // 背景色
+      webgl.clearColor(1.0, 0.0, 0.0, 1.0);
+      // 刷新背景色
+      webgl.clear(webgl.COLOR_BUFFER_BIT);
+      webgl.drawArrays(webgl.TRIANGLES, 0, 3);
+    }
+  </script>
+  <body onload="init()">
+    <canvas id="webgl_canvas" width="500" height="500"></canvas>
+  </body>
+</html>
