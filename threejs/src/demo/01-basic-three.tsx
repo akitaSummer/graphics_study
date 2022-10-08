@@ -8,7 +8,7 @@ function App() {
   const renderer = useRef(new THREE.WebGLRenderer());
   const camera = useRef(
     new THREE.PerspectiveCamera(
-      75, // 竖直方向想能看到的嘴阀范围夹角的1/2
+      75, // 竖直方向想能看到的最大范围夹角的1/2
       window.innerWidth / window.innerHeight,
       0.1,
       1000
