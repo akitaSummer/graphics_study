@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { SpotLight } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import GUI from "lil-gui";
 
 function App() {
   const threeRef = useRef<HTMLDivElement>(null);
@@ -15,9 +16,11 @@ function App() {
       1000
     )
   ); // 透视相机
-  const AxesHelper = useRef(new THREE.AxesHelper(20));
+  const axesHelper = useRef(new THREE.AxesHelper(20));
   const ambientLight = useRef(new THREE.AmbientLight(0xffffff, 0.2)); // 背景光
   const spotLight = useRef(new THREE.SpotLight(0xffffff, 1)); // 聚光灯
+  const spotLightHelper = useRef(new THREE.SpotLightHelper(spotLight.current));
+  const gui = useRef<GUI>();
   const plane = useRef(
     new THREE.Mesh(
       new THREE.PlaneGeometry(800, 400), // 面
@@ -55,7 +58,7 @@ function App() {
 
   const initAxesHelper = () => {
     // x 红 y 绿 z 蓝
-    scene.current.add(AxesHelper.current);
+    scene.current.add(axesHelper.current);
   };
 
   const initAmbientLight = () => {
@@ -72,10 +75,15 @@ function App() {
   };
 
   const initSpotLight = () => {
-    spotLight.current.position.set(-50, 80, 0);
+    spotLight.current.position.set(-50, 60, 0);
     spotLight.current.angle = Math.PI / 6; // 范围
     spotLight.current.penumbra = 0.1; // 虚化
     scene.current.add(spotLight.current);
+  };
+
+  const initSpotLightHelper = () => {
+    spotLightHelper.current.update();
+    scene.current.add(spotLightHelper.current);
   };
 
   const initShadow = () => {
@@ -83,6 +91,49 @@ function App() {
     plane.current.receiveShadow = true; // 接受影子
     spotLight.current.castShadow = true; // 产生影子
     renderer.current.shadowMap.enabled = true;
+  };
+
+  const buildGUI = () => {
+    gui.current = new GUI();
+    gui.current.close();
+    const spotLightFolder = gui.current.addFolder("Spot Light");
+    spotLightFolder
+      .addColor(spotLight.current, "color")
+      .onChange((val: string) => {
+        spotLight.current.color.set(val);
+      });
+    spotLightFolder
+      .add(spotLight.current, "angle", 0, Math.PI / 2)
+      .onChange((val: number) => {
+        spotLight.current.angle = val;
+        spotLightHelper.current.update();
+      });
+    spotLightFolder
+      .add(spotLight.current, "penumbra", 0, 1)
+      .onChange((val: number) => {
+        spotLight.current.penumbra = val;
+      });
+
+    const cameraFolder = gui.current.addFolder("Camera");
+    cameraFolder
+      .add(camera.current.position, "x", -1000, 1000)
+      .step(1)
+      .onChange((val: number) => {
+        camera.current.position.x = val;
+      });
+    cameraFolder
+      .add(camera.current.position, "y", -1000, 1000)
+      .step(1)
+      .onChange((val: number) => {
+        camera.current.position.y = val;
+      });
+    cameraFolder
+      .add(camera.current.position, "z", -1000, 1000)
+      .step(1)
+      .onChange((val: number) => {
+        camera.current.position.z = val;
+      });
+    cameraFolder.close();
   };
 
   const render = () => {
@@ -99,8 +150,10 @@ function App() {
     initAmbientLight();
     initMeshes();
     initSpotLight();
+    initSpotLightHelper();
     initShadow();
     render();
+    buildGUI();
     const resize = () => {
       camera.current.aspect = window.innerWidth / window.innerHeight;
       camera.current.updateProjectionMatrix();
@@ -113,6 +166,7 @@ function App() {
         cancelAnimationFrame(requestID.current);
       }
       window.removeEventListener("resize", resize);
+      gui.current?.destroy();
     };
   }, []);
 

@@ -5,6 +5,7 @@ specifiers:
   '@types/react-dom': ^18.0.6
   '@types/three': ^0.143.1
   '@vitejs/plugin-react': ^2.0.1
+  lil-gui: ^0.17.0
   react: ^18.2.0
   react-dom: ^18.2.0
   three: ^0.143.0
@@ -12,6 +13,7 @@ specifiers:
   vite: ^3.0.7
 
 dependencies:
+  lil-gui: 0.17.0
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   three: 0.143.0
@@ -728,6 +730,10 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
     dev: true
+
+  /lil-gui/0.17.0:
+    resolution: {integrity: sha512-MVBHmgY+uEbmJNApAaPbtvNh1RCAeMnKym82SBjtp5rODTYKWtM+MXHCifLe2H2Ti1HuBGBtK/5SyG4ShQ3pUQ==}
+    dev: false
 
   /loose-envify/1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
