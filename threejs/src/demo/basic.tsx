@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import GUI from "lil-gui";
 
 function App() {
   const threeRef = useRef<HTMLDivElement>(null);
@@ -8,31 +9,23 @@ function App() {
   const renderer = useRef(new THREE.WebGLRenderer());
   const camera = useRef(
     new THREE.PerspectiveCamera(
-      40, // 竖直方向想能看到的最大范围夹角的1/2
+      60, // 竖直方向想能看到的最大范围夹角的1/2
       window.innerWidth / window.innerHeight,
       1,
       1000
     )
   ); // 透视相机
-  const AxesHelper = useRef(new THREE.AxesHelper(20));
-  const ambientLight = useRef(new THREE.AmbientLight(0xffffff, 0.2)); // 背景光
-  const spotLight = useRef(new THREE.SpotLight(0xffffff, 1)); // 聚光灯
-  const plane = useRef(
-    new THREE.Mesh(
-      new THREE.PlaneGeometry(800, 400), // 面
-      new THREE.MeshPhongMaterial({ color: 0x808080 })
-    )
-  ); // 平面
-  const cylinder = useRef(
-    new THREE.Mesh(
-      new THREE.CylinderGeometry(5, 5, 2, 24, 1, false), // 面
-      new THREE.MeshPhongMaterial({ color: 0x4080ff })
-    )
-  );
+  const axesHelper = useRef(new THREE.AxesHelper(20));
+  const hemisphereLight = useRef(new THREE.HemisphereLight(0xffffff, 0x888888)); // 纵向过渡光,模拟大气
+  const gui = useRef<GUI>();
   const controls = useRef(
     new OrbitControls(camera.current, renderer.current.domElement)
   );
   const requestID = useRef<number>();
+
+  const initScene = () => {
+    scene.current.background = new THREE.Color(0x888888);
+  };
 
   const initRender = () => {
     // renderer.current.setClearColor(new THREE.Color(0xeeeeee));
@@ -45,61 +38,64 @@ function App() {
   };
 
   const initCamera = () => {
-    camera.current.position.z = 200;
-    camera.current.position.y = 120;
-    camera.current.position.x = 100;
+    camera.current.position.z = 10;
+    camera.current.position.y = 10;
+    camera.current.position.x = 10;
 
     camera.current.lookAt(0, 0, 0);
   };
 
   const initAxesHelper = () => {
     // x 红 y 绿 z 蓝
-    scene.current.add(AxesHelper.current);
+    scene.current.add(axesHelper.current);
   };
 
-  const initAmbientLight = () => {
-    scene.current.add(ambientLight.current);
+  const initLight = () => {
+    hemisphereLight.current.position.set(0, 1, 0);
+    scene.current.add(hemisphereLight.current);
   };
 
-  const initMeshes = () => {
-    plane.current.rotation.x = -Math.PI / 2;
-    plane.current.position.set(0, -10, 0);
-    scene.current.add(plane.current);
-
-    cylinder.current.position.set(0, 10, 0);
-    scene.current.add(cylinder.current);
-  };
-
-  const initSpotLight = () => {
-    spotLight.current.position.set(-50, 80, 0);
-    spotLight.current.angle = Math.PI / 6; // 范围
-    spotLight.current.penumbra = 0.1; // 虚化
-    scene.current.add(spotLight.current);
-  };
-
-  const initShadow = () => {
-    cylinder.current.castShadow = true; // 产生影子
-    plane.current.receiveShadow = true; // 接受影子
-    spotLight.current.castShadow = true; // 产生影子
-    renderer.current.shadowMap.enabled = true;
+  const buildGUI = () => {
+    gui.current = new GUI();
+    gui.current.close();
+    const cameraFolder = gui.current.addFolder("Camera");
+    cameraFolder
+      .add(camera.current.position, "x", -100, 100)
+      .step(1)
+      .onChange((val: number) => {
+        camera.current.position.x = val;
+      });
+    cameraFolder
+      .add(camera.current.position, "y", -100, 100)
+      .step(1)
+      .onChange((val: number) => {
+        camera.current.position.y = val;
+      });
+    cameraFolder
+      .add(camera.current.position, "z", -100, 100)
+      .step(1)
+      .onChange((val: number) => {
+        camera.current.position.z = val;
+      });
+    cameraFolder.close();
   };
 
   const render = () => {
     if (threeRef.current) {
       renderer.current.render(scene.current, camera.current);
+
       requestID.current = requestAnimationFrame(render);
     }
   };
 
   useEffect(() => {
+    initScene();
     initRender();
     initCamera();
     initAxesHelper();
-    initAmbientLight();
-    initMeshes();
-    initSpotLight();
-    initShadow();
+    initLight();
     render();
+    buildGUI();
     const resize = () => {
       camera.current.aspect = window.innerWidth / window.innerHeight;
       camera.current.updateProjectionMatrix();
@@ -112,6 +108,7 @@ function App() {
         cancelAnimationFrame(requestID.current);
       }
       window.removeEventListener("resize", resize);
+      gui.current?.destroy();
     };
   }, []);
 

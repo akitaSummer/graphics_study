@@ -23,7 +23,7 @@ function App() {
   const white = useRef(new THREE.Color().setHex(0xffffff));
   const color = useRef(new THREE.Color());
   const icosahedronGeometry = useRef(new THREE.IcosahedronGeometry(0.5, 3)); // 正二十面体
-  const material = useRef(new THREE.MeshPhongMaterial({ color: 0xffffff })); // 镜面高光材质
+  const material = useRef(new THREE.MeshPhongMaterial({ color: 0xffffff })); // 镜面高光材质，一般模拟金属或者瓷器
   const raycaster = useRef(new THREE.Raycaster()); // 射线投影
   const mouse = useRef(new THREE.Vector2(1, 1));
   const meshes = useRef(
