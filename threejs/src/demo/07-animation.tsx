@@ -23,16 +23,19 @@ function App() {
   );
   const requestID = useRef<number>();
 
-  const directionalLight = useRef(new THREE.DirectionalLight(0xffffff, 0.2)); // 平行光, 太阳光
+  const clock = useRef(new THREE.Clock());
+  const directionalLight = useRef(new THREE.DirectionalLight(0xffffff, 0.4)); // 平行光, 太阳光
   const directionalLightHelper = useRef(
     new THREE.DirectionalLightHelper(directionalLight.current)
   );
   const boxes = useRef(
     new THREE.Mesh(
       new THREE.BoxGeometry(2, 2, 2),
-      new THREE.MeshPhongMaterial({ color: 0xff0000 })
+      new THREE.MeshPhongMaterial({ color: 0xff0000, transparent: true })
     )
   );
+  const clip = useRef<THREE.AnimationClip>();
+  const mixer = useRef<THREE.AnimationMixer>();
 
   const initScene = () => {
     scene.current.background = new THREE.Color(0x888888);
@@ -63,13 +66,119 @@ function App() {
   };
 
   const initLight = () => {
+    scene.current.add(ambientLight.current);
+
     directionalLight.current.position.set(10, 10, 5);
     scene.current.add(directionalLight.current);
-    scene.current.add(ambientLight.current);
   };
 
   const initMesh = () => {
     scene.current.add(boxes.current);
+  };
+
+  const initAnimation = () => {
+    const positionKF = new THREE.VectorKeyframeTrack(
+      ".position",
+      [0, 1, 2, 3],
+      [
+        // 0
+        0, 0, 0,
+        // 1
+        10, 10, 0,
+        // 2
+        10, 0, 0,
+        // 3
+        0, 0, 0,
+      ]
+    );
+
+    const scaleKF = new THREE.VectorKeyframeTrack(
+      ".scale",
+      [0, 1, 2, 3],
+      [
+        // 0
+        1, 1, 1,
+        // 1
+        2, 2, 2,
+        // 2
+        0.5, 2, 2,
+        // 3
+        1, 1, 1,
+      ]
+    );
+
+    const xAxis = new THREE.Vector3(1, 0, 0);
+    const qInitial = new THREE.Quaternion().setFromAxisAngle(xAxis, 0);
+    const qFinal = new THREE.Quaternion().setFromAxisAngle(xAxis, Math.PI);
+    const quaternionKF = new THREE.QuaternionKeyframeTrack(
+      ".quaternion",
+      [0, 1, 2, 3],
+      [
+        // 0
+        qInitial.x,
+        qInitial.y,
+        qInitial.z,
+        qInitial.w,
+        // 1
+        qFinal.x,
+        qFinal.y,
+        qFinal.z,
+        qFinal.w,
+        // 2
+        qInitial.x,
+        qInitial.y,
+        qInitial.z,
+        qInitial.w,
+        // 3
+        qFinal.x,
+        qFinal.y,
+        qFinal.z,
+        qFinal.w,
+      ]
+    );
+
+    const colorKF = new THREE.ColorKeyframeTrack(
+      ".material.color",
+      [0, 1, 2, 3],
+      [
+        // 0
+        1, 0, 0,
+        // 1
+        0, 1, 0,
+        // 2
+        0, 0, 1,
+        // 3
+        0, 0, 0,
+      ]
+    );
+
+    const opacityKF = new THREE.NumberKeyframeTrack(
+      ".material.opacity",
+      [0, 1, 2, 3],
+      [
+        // 0
+        1,
+        // 1
+        0,
+        // 2
+        1,
+        // 3
+        0,
+      ]
+    );
+
+    clip.current = new THREE.AnimationClip("Action", 4, [
+      positionKF,
+      scaleKF,
+      quaternionKF,
+      colorKF,
+      opacityKF,
+    ]);
+  };
+  const enbaleAnimation = () => {
+    mixer.current = new THREE.AnimationMixer(boxes.current);
+    const clipAction = mixer.current.clipAction(clip.current!);
+    clipAction.play();
   };
 
   const buildGUI = () => {
@@ -101,6 +210,11 @@ function App() {
     if (threeRef.current) {
       renderer.current.render(scene.current, camera.current);
 
+      if (mixer.current) {
+        const delta = clock.current.getDelta();
+        mixer.current.update(delta);
+      }
+
       requestID.current = requestAnimationFrame(render);
     }
   };
@@ -110,8 +224,10 @@ function App() {
     initRender();
     initCamera();
     initHelper();
-    initLight();
     initMesh();
+    initLight();
+    initAnimation();
+    enbaleAnimation();
     render();
     buildGUI();
     const resize = () => {
