@@ -86,7 +86,7 @@ function App() {
   const initMesh = () => {
     dracoLoader.current.setDecoderPath("src/libs/draco/gltf/");
     loader.current.setDRACOLoader(dracoLoader.current);
-    loader.current.load("src/models/LittlestTokyo.glb", (gltf) => {
+    loader.current.load("src/models/gltf/LittlestTokyo.glb", (gltf) => {
       console.log(gltf);
       if (soldier.current) {
         scene.current.remove(

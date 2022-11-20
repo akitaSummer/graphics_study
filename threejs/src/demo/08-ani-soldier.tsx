@@ -86,7 +86,7 @@ function App() {
   const initMesh = () => {
     plane.current.rotation.x = -Math.PI / 2;
     scene.current.add(plane.current);
-    loader.current.load("src/models/Soldier.glb", (gltf) => {
+    loader.current.load("src/models/gltf/Soldier.glb", (gltf) => {
       console.log(gltf);
       if (soldier.current) {
         scene.current.remove(
