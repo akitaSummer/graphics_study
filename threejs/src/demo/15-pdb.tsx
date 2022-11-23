@@ -74,7 +74,7 @@ function App() {
 
   const initMesh = () => {
     const loader = new PDBLoader();
-    loader.load("src/models/pdb/caffeine.pdb", (pdb) => {
+    loader.load("src/models/pdb/caf2.pdb", (pdb) => {
       if (meshes.current.length > 0) {
         meshes.current.forEach((mesh) => {
           scene.current.remove(scene.current.getObjectById(mesh.id)!);
