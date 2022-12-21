@@ -1,3 +1,3 @@
-import { webglStart } from "./demo/rotate";
+import { webglStart } from "./demo/glMatrix_clock";
 
 window.onload = webglStart;
