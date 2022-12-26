@@ -1,3 +1,3 @@
-import { webglStart } from "./demo/dynamic_viewpoint_change";
+import { webglStart } from "./demo/model_view_perspective";
 
 window.onload = webglStart;

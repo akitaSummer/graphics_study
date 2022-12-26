@@ -3,10 +3,11 @@ import { mat4 } from "gl-matrix";
 const vertexstring = `
   attribute vec4 a_position;
   uniform mat4 u_formMatrix;
+  uniform mat4 proj;
   attribute vec4 a_color;
   varying vec4 color;
   void main(void){
-      gl_Position = u_formMatrix * a_position;
+      gl_Position =  u_formMatrix * a_position;
       color = a_color;
   }
 `;
@@ -23,8 +24,9 @@ const projMat4 = mat4.create();
 let uniformAnim: WebGLUniformLocation | null = null;
 let count = 0;
 let webgl: WebGLRenderingContext & { program: WebGLProgram };
-let angley = 0;
-let anglex = 0;
+
+let near = 0;
+let far = 50;
 
 const webglStart = () => {
   init();
@@ -39,17 +41,29 @@ const init = () => {
   initWebgl();
   initShader();
   initBuffer();
+  inittext(near, far);
   document.onkeydown = (event) => {
     if (String.fromCharCode(event.keyCode) == "W") {
-      angley += 0.01;
+      near += 1;
     } else if (String.fromCharCode(event.keyCode) == "S") {
-      angley -= 0.01;
+      near -= 1;
     } else if (String.fromCharCode(event.keyCode) == "A") {
-      anglex -= 0.01;
+      far -= 1;
     } else if (String.fromCharCode(event.keyCode) == "D") {
-      anglex += 0.01;
+      far += 1;
     }
+
+    inittext(near, far);
+    initBuffer();
+    draw();
   };
+};
+
+const inittext = (near: number, far: number) => {
+  const text = document.getElementById("text");
+  if (text) {
+    text.innerHTML = "near:" + near + "<br/>" + "far:" + far;
+  }
 };
 
 const initWebgl = () => {
@@ -99,43 +113,29 @@ const initShader = () => {
 };
 
 const initBuffer = () => {
-  let ModelMatrix = mat4.create();
-  mat4.identity(ModelMatrix);
-  let angle = (Math.PI / 180) * count;
-  console.log(angle);
-  mat4.rotate(ModelMatrix, ModelMatrix, angle, [0, 0, 1]);
+  let ProjMatrix = mat4.create();
+  mat4.identity(ProjMatrix);
+  mat4.ortho(ProjMatrix, -100, 100, -100, 100, near, far); //修改可视域范围
 
-  let ViewMatrix = mat4.create();
-  mat4.identity(ViewMatrix);
-  ViewMatrix = mat4.lookAt(
-    ViewMatrix,
-    [anglex, angley, 0.2],
-    [0, 0, 0],
-    [0, 1, 0]
-  );
-  console.log(ViewMatrix);
-
-  let mvMatrix = mat4.identity(mat4.create());
-
-  mvMatrix = mat4.multiply(mvMatrix, ViewMatrix, ModelMatrix);
   // prettier-ignore
   let arr = [
-    0.0, 0.5, -0.4, 1, 0.4, 1.0, 0.4, 1,
-    -0.5, -0.5, -0.4, 1, 0.4, 1.0, 0.4, 1,
-    0.5, -0.5, -0.4, 1, 0.4, 1.0, 0.4, 1,
+    0.0, 70, -40, 1,      1, 0,  0, 1,
+    -50, -30, -40, 1,     1, 0,  0, 1, // 绿色
+    50, -30, -40, 1,      1, 0,  0, 1,
 
-    0.5, 0.4, -0.2, 1, 1.0, 1.0, 0.4, 1,
-    -0.5, 0.4, -0.2, 1, 1.0, 1.0, 0.4, 1,
-    0.0, -0.6, -0.2, 1, 1.0, 1.0, 0.4, 1,
+    50, 40, -20, 1, 1.0, 1.0,  0.4, 1,
+    -50, 40, -20, 1, 1.0, 1.0,  0.4, 1,
+    0.0, -60,-20, 1, 1.0, 1.0,  0.4, 1,// 黄色
 
-    0.0, 0.5, 0.0, 1, 0.4, 0.4, 1.0, 1,
-    -0.5, -0.5, 0.0, 1, 0.4, 0.4, 1.0, 1,
-    0.5, -0.5, 0.0, 1, 0.4, 0.4, 1.0, 1,
-]
+    0.0, 50, 0.0, 1,  0.4,  0.4, 1.0, 1,
+    -50, -50, 0.0, 1,  0.4,  0.4, 1.0, 1,
+    50, -50, 0.0, 1,  0.4,  0.4, 1.0, 1, // 蓝色
 
-  const pointPosition = new Float32Array(arr);
-  const aPsotion = webgl.getAttribLocation(webgl.program, "a_position");
-  const triangleBuffer = webgl.createBuffer();
+  ];
+
+  let pointPosition = new Float32Array(arr);
+  let aPsotion = webgl.getAttribLocation(webgl.program, "a_position");
+  let triangleBuffer = webgl.createBuffer();
   webgl.bindBuffer(webgl.ARRAY_BUFFER, triangleBuffer);
   webgl.bufferData(webgl.ARRAY_BUFFER, pointPosition, webgl.STATIC_DRAW);
   webgl.enableVertexAttribArray(aPsotion);
@@ -145,17 +145,12 @@ const initBuffer = () => {
   webgl.vertexAttribPointer(aColor, 4, webgl.FLOAT, false, 8 * 4, 4 * 4);
 
   let uniformMatrix1 = webgl.getUniformLocation(webgl.program, "u_formMatrix");
-  webgl.uniformMatrix4fv(uniformMatrix1, false, mvMatrix);
+  webgl.uniformMatrix4fv(uniformMatrix1, false, ProjMatrix);
 };
 
 function draw() {
   webgl.clearColor(0.0, 1.0, 0.0, 1.0);
-  webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-  webgl.enable(webgl.DEPTH_TEST);
-  //纹理变动
-  uniformAnim = webgl.getUniformLocation(webgl.program, "anim");
-  count = count + 1;
-  webgl.uniform1f(uniformAnim, count);
+  webgl.clear(webgl.COLOR_BUFFER_BIT);
   webgl.drawArrays(webgl.TRIANGLES, 0, 9);
 }
 
