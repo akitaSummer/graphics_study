@@ -1,3 +1,3 @@
-import { webglStart } from "./demo/model_view_perspective";
+import { webglStart } from "./demo/cube";
 
 window.onload = webglStart;

@@ -96,15 +96,18 @@ const initShader = () => {
 };
 
 const initBuffer = () => {
+  // prettier-ignore
   let arr = [
     // 六个一组，前四个为点，后两个为纹理坐标
-    -0.5, -0.5, 0, 1, 0, 0, -0.5, 0.5, 0, 1, 0, -1, 0.5, 0.5, 0, 1, 1, -1, 0.5,
-    -0.5, 0, 1, 1, 0,
+    // -0.5, -0.5, 0, 1,    0, 0, 
+    // -0.5, 0.5, 0, 1,     0, -1, 
+    // 0.5, 0.5, 0, 1,      1, -1, 
+    // 0.5, -0.5, 0, 1,     1, 0,
 
-    // -0.5, -0.5, 0, 1,      1, 1,
-    // -0.5, 0.5, 0, 1,       0, 1,
-    // 0.5, 0.5, 0, 1,        0, 0,
-    // 0.5, -0.5, 0, 1,       1, 0,
+    -0.5, -0.5, 0, 1,      0, 0,
+    -0.5, 0.5, 0, 1,       0, 1,
+    0.5, 0.5, 0, 1,        1, 1,
+    0.5, -0.5, 0, 1,       1, 0,
   ];
   let index = [0, 1, 2, 2, 0, 3];
   let pointPosition = new Float32Array(arr);
@@ -138,7 +141,7 @@ const handleLoadedTexture = (
   texture: WebGLTexture & { image: HTMLImageElement }
 ) => {
   webgl.bindTexture(webgl.TEXTURE_2D, texture);
-  // webgl.pixelStorei(webgl.UNPACK_FLIP_Y_WEBGL,666);
+  webgl.pixelStorei(webgl.UNPACK_FLIP_Y_WEBGL, 666);
 
   webgl.texImage2D(
     webgl.TEXTURE_2D,
