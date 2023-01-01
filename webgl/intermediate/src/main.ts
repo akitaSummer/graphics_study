@@ -1,3 +1,3 @@
-import { webglStart } from "./demo/point_light";
+import { webglStart } from "./demo/multiple_node";
 
 window.onload = webglStart;
