@@ -229,14 +229,10 @@ const degreesToRads = (deg: number) => (deg * Math.PI) / 180.0;
 
 function draw() {
   let modelArr = initTransformation(g_joint1Angle, new Float32Array([0, 1, 0]));
-  // webgl.drawElements(webgl.TRIANGLES, indices.length, webgl.UNSIGNED_BYTE, 0);
+  webgl.drawElements(webgl.TRIANGLES, indices.length, webgl.UNSIGNED_BYTE, 0);
 
   mat4.translate(modelArr, modelArr, [0, 0, 0]);
-  let mvpArr = initTransformation(
-    g_arm1Angle,
-    new Float32Array([0, 1, 0]),
-    modelArr
-  );
+  initTransformation(g_arm1Angle, new Float32Array([0, 0, 1]), modelArr);
   webgl.drawElements(webgl.TRIANGLES, indices.length, webgl.UNSIGNED_BYTE, 0);
 }
 

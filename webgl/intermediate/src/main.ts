@@ -1,3 +1,3 @@
-import { webglStart } from "./demo/multiple_node";
+import { webglStart } from "./demo/single_node";
 
 window.onload = webglStart;

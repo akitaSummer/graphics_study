@@ -35,7 +35,7 @@ function App() {
   );
 
   const initScene = () => {
-    scene.current.background = new THREE.Color(0x888888);
+    scene.current.background = new THREE.Color(0x000000);
   };
 
   const initRender = () => {
