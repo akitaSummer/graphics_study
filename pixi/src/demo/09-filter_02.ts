@@ -84,6 +84,7 @@ app.ticker.add((delta) => {
 });
 
 app.view.addEventListener?.("click", (e) => {
+  // @ts-ignore
   (app.stage.filters![1] as ShockwaveFilter).center = [e.clientX, e.clientY];
   (app.stage.filters![1] as ShockwaveFilter).time = 0;
 });
