@@ -1,11 +1,12 @@
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@/utils/constants";
 import { Scene, GameObject } from "@eva/eva.js";
-import { Graphics } from "@eva/plugin-renderer-graphics";
-import { Text } from "@eva/plugin-renderer-text";
+
+import { BattleManager } from "./manager";
 
 import BackgroundColor from "./GameObjects/BackgroundColor";
 import Footer from "./GameObjects/Footer";
 import Controller from "./GameObjects/Controller";
+import TileMap from "./GameObjects/TileMap";
 
 const BattleScene = () => {
   const scene = new Scene("BattleScene", {
@@ -17,6 +18,10 @@ const BattleScene = () => {
 
   scene.addChild(BackgroundColor());
   scene.addChild(Controller());
+
+  const stage = new GameObject("stage");
+  stage.addComponent(new BattleManager());
+  scene.addChild(stage);
 
   scene.addChild(Footer());
 
