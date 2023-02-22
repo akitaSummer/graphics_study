@@ -3,6 +3,8 @@ import { Render } from "@eva/plugin-renderer-render";
 import { Sprite } from "@eva/plugin-renderer-sprite";
 import { Transition } from "@eva/plugin-transition";
 import { Event, HIT_AREA_TYPE } from "@eva/plugin-renderer-event";
+import EventManager from "@/runtime/EventManager";
+import { EVENT_ENUM, CONTROLLER_ENUM } from "@/utils/enums";
 
 const CTRL_WIDTH = 70;
 const CTRL_HEIGHT = 60;
@@ -17,7 +19,7 @@ const getPosition = (index: number) => {
   };
 };
 
-const Button = (index: number, key: string) => {
+const Button = (type: CONTROLLER_ENUM, index: number, key: string) => {
   const go = new GameObject("button", {
     size: { width: CTRL_WIDTH, height: CTRL_HEIGHT },
     position: getPosition(index),
@@ -117,20 +119,21 @@ const Button = (index: number, key: string) => {
 
   const startHandler = () => {
     animation.play("small", 1);
+    EventManager.Instance.emit(EVENT_ENUM.PLAYER_CTRL, type);
   };
 
-  event.on("touchstart", () => !keydown && startHandler);
+  event.on("touchstart", () => !keydown && startHandler());
 
   const endHandler = () => {
     animation.play("big", 1);
   };
 
-  event.on("touchend", () => !keydown && endHandler);
+  event.on("touchend", () => !keydown && endHandler());
   // 不在物体上时
-  event.on("touchendoutside", () => !keydown && endHandler);
+  event.on("touchendoutside", () => !keydown && endHandler());
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === key) {
+    if (e.key === key && !keydown) {
       startHandler();
       keydown = true;
     }

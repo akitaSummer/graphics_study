@@ -1,6 +1,6 @@
 import { GameObject } from "@eva/eva.js";
-import { Text } from "@eva/plugin-renderer-text";
 import { Render } from "@eva/plugin-renderer-render";
+import { CONTROLLER_ENUM } from "@/utils/enums";
 
 import Button from "./Button";
 
@@ -20,12 +20,12 @@ const Controller = () => {
     },
   });
 
-  go.addChild(Button(1, "q"));
-  go.addChild(Button(2, "a"));
-  go.addChild(Button(3, "w"));
-  go.addChild(Button(4, "s"));
-  go.addChild(Button(5, "e"));
-  go.addChild(Button(6, "d"));
+  go.addChild(Button(CONTROLLER_ENUM.TURNLEFT, 1, "q"));
+  go.addChild(Button(CONTROLLER_ENUM.LEFT, 2, "a"));
+  go.addChild(Button(CONTROLLER_ENUM.TOP, 3, "w"));
+  go.addChild(Button(CONTROLLER_ENUM.BOTTOM, 4, "s"));
+  go.addChild(Button(CONTROLLER_ENUM.TURNRIGHT, 5, "e"));
+  go.addChild(Button(CONTROLLER_ENUM.RIGHT, 6, "d"));
 
   go.addComponent(
     new Render({

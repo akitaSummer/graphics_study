@@ -9,4 +9,10 @@ export default class DataManager extends Singleton {
   mapInfo: ITile[][] = [];
   mapRowCount: number = 0;
   mapColumCount: number = 0;
+
+  reset = () => {
+    this.mapInfo = [];
+    this.mapRowCount = 0;
+    this.mapColumCount = 0;
+  };
 }
