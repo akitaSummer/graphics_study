@@ -1,14 +1,14 @@
 import { ENTITY_HEIGHT, ENTITY_WIDTH } from "@/base/EntityManager";
 import { GameObject } from "@eva/eva.js";
 import { Render } from "@eva/plugin-renderer-render";
-import PlayerManager from "./Script/manager";
+import WoodenSkeletonManager from "./Script/manager";
 
-const Player = () => {
-  const go = new GameObject("player", {
+const WoodenSkeleton = () => {
+  const go = new GameObject("woodenSkeleton", {
     size: { width: ENTITY_WIDTH, height: ENTITY_HEIGHT },
   });
 
-  go.addComponent(new PlayerManager());
+  go.addComponent(new WoodenSkeletonManager());
 
   go.addComponent(
     new Render({
@@ -19,4 +19,4 @@ const Player = () => {
   return go;
 };
 
-export default Player;
+export default WoodenSkeleton;

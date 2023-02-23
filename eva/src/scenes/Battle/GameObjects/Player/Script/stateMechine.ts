@@ -6,6 +6,12 @@ import StateMachine, {
 } from "@/base/StateMachine";
 import { FSM_PARAM_TYPE_ENUM, PARAMS_NAME_ENUM } from "@/utils/enums";
 import { SpriteAnimation } from "@eva/plugin-renderer-sprite-animation";
+import BlockBackSubStateMachine from "./blockBackSubStateMachine";
+import BlockFrontSubStateMachine from "./blockFrontSubStateMachine";
+import BlockLeftSubStateMachine from "./blockLeftSubStateMachine";
+import BlockRightSubStateMachine from "./blockRightSubStateMachine";
+import BlockTurnLeftSubStateMachine from "./blockTurnLeftSubStateMachine";
+import BlockTurnRightSubStateMachine from "./blockTurnRightSubStateMachine";
 import IdleSubStateMachine from "./idleSubStateMachine";
 import TurnLeftSubStateMachine from "./turnLeftSubStateMachine";
 import TurnRightSubStateMachine from "./turnRightSubStateMachine";
@@ -32,6 +38,12 @@ export default class PlayerStateMachine extends StateMachine {
     this.params.set(PARAMS_NAME_ENUM.IDLE, getInitParamsTrigger());
     this.params.set(PARAMS_NAME_ENUM.TURNLEFT, getInitParamsTrigger());
     this.params.set(PARAMS_NAME_ENUM.TURNRIGHT, getInitParamsTrigger());
+    this.params.set(PARAMS_NAME_ENUM.BLOCKFRONT, getInitParamsTrigger());
+    this.params.set(PARAMS_NAME_ENUM.BLOCKBACK, getInitParamsTrigger());
+    this.params.set(PARAMS_NAME_ENUM.BLOCKLEFT, getInitParamsTrigger());
+    this.params.set(PARAMS_NAME_ENUM.BLOCKRIGHT, getInitParamsTrigger());
+    this.params.set(PARAMS_NAME_ENUM.BLOCKTURNLEFT, getInitParamsTrigger());
+    this.params.set(PARAMS_NAME_ENUM.BLOCKTURNRIGHT, getInitParamsTrigger());
     this.params.set(PARAMS_NAME_ENUM.DIRECTION, getInitParamsNumber());
   };
 
@@ -51,6 +63,31 @@ export default class PlayerStateMachine extends StateMachine {
       PARAMS_NAME_ENUM.TURNRIGHT,
       new TurnRightSubStateMachine(this, spriteAnimation)
     );
+
+    this.stateMachines.set(
+      PARAMS_NAME_ENUM.BLOCKFRONT,
+      new BlockFrontSubStateMachine(this, spriteAnimation)
+    );
+    this.stateMachines.set(
+      PARAMS_NAME_ENUM.BLOCKBACK,
+      new BlockBackSubStateMachine(this, spriteAnimation)
+    );
+    this.stateMachines.set(
+      PARAMS_NAME_ENUM.BLOCKLEFT,
+      new BlockLeftSubStateMachine(this, spriteAnimation)
+    );
+    this.stateMachines.set(
+      PARAMS_NAME_ENUM.BLOCKRIGHT,
+      new BlockRightSubStateMachine(this, spriteAnimation)
+    );
+    this.stateMachines.set(
+      PARAMS_NAME_ENUM.BLOCKTURNLEFT,
+      new BlockTurnLeftSubStateMachine(this, spriteAnimation)
+    );
+    this.stateMachines.set(
+      PARAMS_NAME_ENUM.BLOCKTURNRIGHT,
+      new BlockTurnRightSubStateMachine(this, spriteAnimation)
+    );
   };
 
   // 初始化动画事件
@@ -58,7 +95,7 @@ export default class PlayerStateMachine extends StateMachine {
     // @ts-ignore
     const spriteAnimation = this.gameObject.getComponent(SpriteAnimation);
     spriteAnimation.on("complete", () => {
-      const list = ["player_turn"];
+      const list = ["player_turn", "player_block"];
       if (list.some((i) => spriteAnimation.resource.startsWith(i))) {
         this.currentState = this.stateMachines.get(PARAMS_NAME_ENUM.IDLE);
       }
@@ -79,6 +116,30 @@ export default class PlayerStateMachine extends StateMachine {
           } else if (this.params.get(PARAMS_NAME_ENUM.TURNRIGHT)?.value) {
             this.currentState = this.stateMachines.get(
               PARAMS_NAME_ENUM.TURNRIGHT
+            );
+          } else if (this.params.get(PARAMS_NAME_ENUM.BLOCKFRONT)?.value) {
+            this.currentState = this.stateMachines.get(
+              PARAMS_NAME_ENUM.BLOCKFRONT
+            );
+          } else if (this.params.get(PARAMS_NAME_ENUM.BLOCKBACK)?.value) {
+            this.currentState = this.stateMachines.get(
+              PARAMS_NAME_ENUM.BLOCKBACK
+            );
+          } else if (this.params.get(PARAMS_NAME_ENUM.BLOCKLEFT)?.value) {
+            this.currentState = this.stateMachines.get(
+              PARAMS_NAME_ENUM.BLOCKLEFT
+            );
+          } else if (this.params.get(PARAMS_NAME_ENUM.BLOCKRIGHT)?.value) {
+            this.currentState = this.stateMachines.get(
+              PARAMS_NAME_ENUM.BLOCKRIGHT
+            );
+          } else if (this.params.get(PARAMS_NAME_ENUM.BLOCKTURNLEFT)?.value) {
+            this.currentState = this.stateMachines.get(
+              PARAMS_NAME_ENUM.BLOCKTURNLEFT
+            );
+          } else if (this.params.get(PARAMS_NAME_ENUM.BLOCKTURNRIGHT)?.value) {
+            this.currentState = this.stateMachines.get(
+              PARAMS_NAME_ENUM.BLOCKTURNRIGHT
             );
           } else if (this.params.get(PARAMS_NAME_ENUM.IDLE)?.value) {
             this.currentState = this.stateMachines.get(PARAMS_NAME_ENUM.IDLE);

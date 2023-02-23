@@ -7,6 +7,8 @@ import { TILE_HEIGHT, TILE_WIDTH } from "./GameObjects/Tile";
 import EventManager from "@/runtime/EventManager";
 import { EVENT_ENUM } from "@/utils/enums";
 import Player from "./GameObjects/Player";
+import WoodenSkeleton from "./GameObjects/WoodenSkeleton";
+import PlayerManager from "./GameObjects/Player/Script/manager";
 
 export class BattleManager extends Component {
   static componentName = "BattleManager";
@@ -23,9 +25,10 @@ export class BattleManager extends Component {
     const level = levels[`level${levelIndex}`];
     DataManager.Instance.mapInfo = level.mapInfo;
     DataManager.Instance.mapRowCount = level.mapInfo.length;
-    DataManager.Instance.mapColumCount = level.mapInfo[0].length;
+    DataManager.Instance.mapColumnCount = level.mapInfo[0].length;
     this.generateTileMap();
     this.generatePlayer();
+    this.generateEnemies();
   };
 
   // 生成地图
@@ -36,14 +39,21 @@ export class BattleManager extends Component {
 
   // 生成角色
   generatePlayer = () => {
-    this.gameObject.addChild(Player());
+    const player = Player();
+    this.gameObject.addChild(player);
+    DataManager.Instance.player = player.getComponent(PlayerManager);
+  };
+
+  // 生成敌人
+  generateEnemies = () => {
+    this.gameObject.addChild(WoodenSkeleton());
   };
 
   // 调整位置
   adapPos = () => {
-    const { mapRowCount, mapColumCount } = DataManager.Instance;
+    const { mapRowCount, mapColumnCount } = DataManager.Instance;
     const disx = (SCREEN_WIDTH - TILE_WIDTH * mapRowCount) / 2;
-    const disy = (SCREEN_HEIGHT - TILE_HEIGHT * mapColumCount) / 2 - 50;
+    const disy = (SCREEN_HEIGHT - TILE_HEIGHT * mapColumnCount) / 2 - 50;
 
     this.gameObject.transform.position.x = disx;
     this.gameObject.transform.position.y = disy;

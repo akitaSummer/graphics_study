@@ -2,6 +2,7 @@ import { Component } from "@eva/eva.js";
 import DataManager from "@/runtime/DataManager";
 import { renderByRange } from "@/utils/tools";
 import Tile from "../Tile";
+import TileManager from "../Tile/manager";
 
 export class TileMapManager extends Component {
   static componentName = "TileMapManager";
@@ -11,10 +12,11 @@ export class TileMapManager extends Component {
   };
 
   initTile = () => {
-    const { mapInfo } = DataManager.Instance;
+    const { mapInfo, tileInfo } = DataManager.Instance;
 
     for (let i = 0; i < mapInfo.length; i++) {
       const column = mapInfo[i];
+      tileInfo[i] = [];
       for (let j = 0; j < column.length; j++) {
         const item = column[j];
 
@@ -37,6 +39,9 @@ export class TileMapManager extends Component {
 
         const tile = Tile(item.type, imgSrc, i, j);
         this.gameObject.addChild(tile);
+
+        // @ts-ignore
+        tileInfo[i][j] = tile.getComponent(TileManager!);
       }
     }
   };

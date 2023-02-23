@@ -1,11 +1,11 @@
 import DirectionSubStateMachine from "@/base/DirectionSubStateMachine";
 import State from "@/base/State";
+import StateMachine from "@/base/StateMachine";
 import { DIRECTION_ENUM } from "@/utils/enums";
 import { SpriteAnimation } from "@eva/plugin-renderer-sprite-animation";
-import PlayerStateMachine from "./stateMechine";
 
 export default class TurnLeftSubStateMachine extends DirectionSubStateMachine {
-  constructor(fsm: PlayerStateMachine, spriteAnimation: SpriteAnimation) {
+  constructor(fsm: StateMachine, spriteAnimation: SpriteAnimation) {
     super(fsm);
 
     this.stateMachines.set(

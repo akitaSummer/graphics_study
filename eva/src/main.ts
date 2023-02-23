@@ -23,6 +23,7 @@ const game = new Game({
       width: SCREEN_WIDTH,
       height: SCREEN_HEIGHT,
       antialias: true,
+      enableScroll: false,
     }),
     new ImgSystem(),
     new TransitionSystem(),

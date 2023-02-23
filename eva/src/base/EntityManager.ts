@@ -8,6 +8,9 @@ import {
 import { Component } from "@eva/eva.js";
 import StateMachine from "./StateMachine";
 
+export const ENTITY_WIDTH = 128;
+export const ENTITY_HEIGHT = 128;
+
 export default abstract class EntityManager extends Component {
   static componentName: string = "EntityManager";
 
