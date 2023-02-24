@@ -10,6 +10,9 @@ export default class State {
   ) {}
 
   run = () => {
+    if (this.spriteAnimation.resource === this.animationName) {
+      return;
+    }
     this.spriteAnimation.resource = this.animationName;
 
     // 修复动画闪动

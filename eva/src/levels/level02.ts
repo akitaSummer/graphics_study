@@ -1,11 +1,11 @@
 import {
   TILE_TYPE_ENUM,
-  //   DIRECTION_ENUM,
-  //   ENTITY_TYPE_ENUM,
-  //   ENTITY_STATE_ENUM,
+  DIRECTION_ENUM,
+  ENTITY_TYPE_ENUM,
+  ENTITY_STATE_ENUM,
 } from "@/utils/enums";
 // import { IEntity, ILevel, ISpikes } from "./index";
-import { ILevel } from "./index";
+import { IEntity, ILevel } from "./index";
 
 const mapInfo = [
   [
@@ -219,13 +219,13 @@ const mapInfo = [
 
 // const bursts: Array<IEntity> = [];
 
-// const door: IEntity = {
-//   x: 5,
-//   y: 3,
-//   direction: DIRECTION_ENUM.LEFT,
-//   state: ENTITY_STATE_ENUM.IDLE,
-//   type: ENTITY_TYPE_ENUM.DOOR,
-// };
+const door: IEntity = {
+  x: 5,
+  y: 3,
+  direction: DIRECTION_ENUM.LEFT,
+  state: ENTITY_STATE_ENUM.IDLE,
+  type: ENTITY_TYPE_ENUM.DOOR,
+};
 
 const level: ILevel = {
   mapInfo,
@@ -233,7 +233,7 @@ const level: ILevel = {
   //   enemies,
   //   spikes,
   //   bursts,
-  //   door,
+  door,
 };
 
 export default level;

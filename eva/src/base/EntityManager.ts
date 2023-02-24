@@ -5,6 +5,7 @@ import {
   ENTITY_STATE_ENUM,
   PARAMS_NAME_ENUM,
 } from "@/utils/enums";
+import { randomByLength } from "@/utils/tools";
 import { Component } from "@eva/eva.js";
 import StateMachine from "./StateMachine";
 
@@ -14,6 +15,7 @@ export const ENTITY_HEIGHT = 128;
 export default abstract class EntityManager extends Component {
   static componentName: string = "EntityManager";
 
+  id: string = randomByLength(12);
   x: number = 0;
   y: number = 0;
   private _direction: DIRECTION_ENUM = DIRECTION_ENUM.TOP;

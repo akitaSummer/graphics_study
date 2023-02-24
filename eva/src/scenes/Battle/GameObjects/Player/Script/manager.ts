@@ -6,6 +6,7 @@ import {
   DIRECTION_ENUM,
   ENTITY_STATE_ENUM,
   EVENT_ENUM,
+  SHAKE_TYPE_ENUM,
 } from "@/utils/enums";
 import { TILE_HEIGHT, TILE_WIDTH } from "../../Tile";
 import PlayerStateMachine from "./stateMechine";
@@ -25,6 +26,8 @@ export default class PlayerManager extends EntityManager {
     this.fsm = this.gameObject.addComponent(new PlayerStateMachine());
     this.state = ENTITY_STATE_ENUM.IDLE;
     EventManager.Instance.on(EVENT_ENUM.PLAYER_CTRL, this.inputHandler, this);
+
+    EventManager.Instance.on(EVENT_ENUM.ATTACK_PLAYER, this.onDead, this);
   };
 
   update = () => {
@@ -33,6 +36,10 @@ export default class PlayerManager extends EntityManager {
       this.x * TILE_WIDTH - TILE_WIDTH * 1.5;
     this.gameObject.transform.position.y =
       this.y * TILE_HEIGHT - TILE_HEIGHT * 1.5;
+  };
+
+  onDead = (type: ENTITY_STATE_ENUM) => {
+    this.state = type;
   };
 
   updateXY = () => {
@@ -64,11 +71,165 @@ export default class PlayerManager extends EntityManager {
     if (this.isMoving) {
       return;
     }
+
+    if (
+      this.state === ENTITY_STATE_ENUM.DEATH ||
+      this.state === ENTITY_STATE_ENUM.AIRDEATH ||
+      this.state === ENTITY_STATE_ENUM.ATTACK
+    ) {
+      return;
+    }
+
+    const id = this.willAttack(direction);
+
+    if (id) {
+      EventManager.Instance.emit(EVENT_ENUM.RECORD_STEP);
+      this.state = ENTITY_STATE_ENUM.ATTACK;
+      EventManager.Instance.emit(EVENT_ENUM.ATTACK_ENEMY, id);
+      EventManager.Instance.emit(EVENT_ENUM.PLAYER_MOVE_END);
+      EventManager.Instance.emit(EVENT_ENUM.DOOR_OPEN);
+      return;
+    }
+
+    //优化成四个方向的震动效果
+    if (this.willBlock(direction)) {
+      if (direction === CONTROLLER_ENUM.TOP) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.TOP
+        );
+      } else if (direction === CONTROLLER_ENUM.BOTTOM) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.BOTTOM
+        );
+      } else if (direction === CONTROLLER_ENUM.LEFT) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.LEFT
+        );
+      } else if (direction === CONTROLLER_ENUM.RIGHT) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.RIGHT
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNLEFT &&
+        this.direction === DIRECTION_ENUM.TOP
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.LEFT
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNLEFT &&
+        this.direction === DIRECTION_ENUM.LEFT
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.BOTTOM
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNLEFT &&
+        this.direction === DIRECTION_ENUM.BOTTOM
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.RIGHT
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNLEFT &&
+        this.direction === DIRECTION_ENUM.RIGHT
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.TOP
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNRIGHT &&
+        this.direction === DIRECTION_ENUM.TOP
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.RIGHT
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNRIGHT &&
+        this.direction === DIRECTION_ENUM.LEFT
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.TOP
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNRIGHT &&
+        this.direction === DIRECTION_ENUM.BOTTOM
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.LEFT
+        );
+      } else if (
+        direction === CONTROLLER_ENUM.TURNRIGHT &&
+        this.direction === DIRECTION_ENUM.RIGHT
+      ) {
+        EventManager.Instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          SHAKE_TYPE_ENUM.BOTTOM
+        );
+      }
+      return;
+    }
+
     if (this.willBlock(direction)) {
       return;
     }
     this.move(direction);
   };
+
+  /***
+   * 检查枪所在方向是否有敌人，有则攻击
+   */
+  willAttack(inputDirection: CONTROLLER_ENUM) {
+    const enemies = DataManager.Instance.enemies.filter(
+      (enemy) => enemy.state !== ENTITY_STATE_ENUM.DEATH
+    );
+    for (let i = 0; i < enemies.length; i++) {
+      const enemy = enemies[i];
+      const { x: enemyX, y: enemyY, id: enemyId } = enemy;
+      if (
+        this.direction === DIRECTION_ENUM.TOP &&
+        inputDirection === CONTROLLER_ENUM.TOP &&
+        enemyY === this.targetY - 2 &&
+        enemyX === this.x
+      ) {
+        return enemyId;
+      } else if (
+        this.direction === DIRECTION_ENUM.BOTTOM &&
+        inputDirection === CONTROLLER_ENUM.BOTTOM &&
+        enemyY === this.targetY + 2 &&
+        enemyX === this.x
+      ) {
+        return enemyId;
+      } else if (
+        this.direction === DIRECTION_ENUM.LEFT &&
+        inputDirection === CONTROLLER_ENUM.LEFT &&
+        enemyX === this.targetX - 2 &&
+        enemyY === this.y
+      ) {
+        return enemyId;
+      } else if (
+        this.direction === DIRECTION_ENUM.RIGHT &&
+        inputDirection === CONTROLLER_ENUM.RIGHT &&
+        enemyX === this.targetX + 2 &&
+        enemyY === this.y
+      ) {
+        return enemyId;
+      }
+    }
+
+    return "";
+  }
 
   move = (type: CONTROLLER_ENUM) => {
     switch (type) {
@@ -139,15 +300,13 @@ export default class PlayerManager extends EntityManager {
 
   /***
    * 判断角色是否能按预期进行移动
-   * @param type
    */
   willBlock = (type: CONTROLLER_ENUM) => {
     const { targetX: x, targetY: y, direction } = this;
     const { tileInfo: tileInfo } = DataManager.Instance;
-    // const enemies: EnemyManager[] = DataManager.Instance.enemies.filter(
-    //   (enemy: EnemyManager) => enemy.state !== ENTITY_STATE_ENUM.DEATH
-    // );
-    const enemies: any[] = [];
+    const enemies = DataManager.Instance.enemies.filter(
+      (enemy) => enemy.state !== ENTITY_STATE_ENUM.DEATH
+    );
     const {
       x: doorX,
       y: doorY,

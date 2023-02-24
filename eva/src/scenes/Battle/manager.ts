@@ -1,6 +1,6 @@
 import DataManager from "@/runtime/DataManager";
 import { Component } from "@eva/eva.js";
-import levels from "@/levels";
+import levels, { ILevel } from "@/levels";
 import TileMap from "./GameObjects/TileMap";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@/utils/constants";
 import { TILE_HEIGHT, TILE_WIDTH } from "./GameObjects/Tile";
@@ -9,9 +9,13 @@ import { EVENT_ENUM } from "@/utils/enums";
 import Player from "./GameObjects/Player";
 import WoodenSkeleton from "./GameObjects/WoodenSkeleton";
 import PlayerManager from "./GameObjects/Player/Script/manager";
+import WoodenSkeletonManager from "./GameObjects/WoodenSkeleton/Script/manager";
+import DoorManager from "./GameObjects/Door/Script/manager";
+import Door from "./GameObjects/Door";
 
 export class BattleManager extends Component {
   static componentName = "BattleManager";
+  level?: ILevel;
 
   init = () => {
     EventManager.Instance.on(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this);
@@ -22,13 +26,14 @@ export class BattleManager extends Component {
   initLevel = () => {
     this.clearLevel();
     const { levelIndex } = DataManager.Instance;
-    const level = levels[`level${levelIndex}`];
-    DataManager.Instance.mapInfo = level.mapInfo;
-    DataManager.Instance.mapRowCount = level.mapInfo.length;
-    DataManager.Instance.mapColumnCount = level.mapInfo[0].length;
+    this.level = levels[`level${levelIndex}`];
+    DataManager.Instance.mapInfo = this.level.mapInfo;
+    DataManager.Instance.mapRowCount = this.level.mapInfo.length;
+    DataManager.Instance.mapColumnCount = this.level.mapInfo[0].length;
     this.generateTileMap();
-    this.generatePlayer();
+    this.generateDoor();
     this.generateEnemies();
+    this.generatePlayer();
   };
 
   // 生成地图
@@ -46,7 +51,20 @@ export class BattleManager extends Component {
 
   // 生成敌人
   generateEnemies = () => {
-    this.gameObject.addChild(WoodenSkeleton());
+    const enemy = WoodenSkeleton();
+    this.gameObject.addChild(enemy);
+    DataManager.Instance.enemies.push(
+      enemy.getComponent(WoodenSkeletonManager)
+    );
+  };
+
+  /***
+   * 生成门
+   */
+  generateDoor = () => {
+    const door = Door();
+    this.gameObject.addChild(door);
+    DataManager.Instance.door = door.getComponent(DoorManager);
   };
 
   // 调整位置
