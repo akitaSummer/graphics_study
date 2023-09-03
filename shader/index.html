@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + TS</title>
+  </head>
+
+  <script src="/lib/gl-utils.js"></script>
+  <script src="/lib/gl-debug.js"></script>
+  <script src="/lib/utils.js"></script>
+  <script src="/lib/gl-matrix.js"></script>
+  <script src="/lib/gl-lint.js" crossorigin></script>
+  <script type="text/javascript">
+    // 顶点着色器
+    var VSHADER_SOURCE = "";
+    // 片元着色器
+    var FSHADER_SOURCE = "";
+    var gl = null;
+    async function main() {
+      initWebgl();
+      initShader();
+    }
+    function initWebgl() {
+      // 获取canvas对象
+      let canvas = document.getElementById("webgl");
+      //获取webgl绘制对象
+      gl = getWebGLContext(canvas);
+      if (!gl) {
+        console.log("不支持webgl哦！");
+        return;
+      }
+    }
+    async function initShader() {
+      // 初始化主色器程序
+      let FSHADER_SOURCE = await loadShaderFromFile(
+        "/src/shader/color.frag.glsl"
+      );
+      let VSHADER_SOURCE = await loadShaderFromFile(
+        "/src/shader/color.vert.glsl"
+      );
+
+      if (VSHADER_SOURCE && FSHADER_SOURCE) {
+        initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+        initBuffer();
+      }
+    }
+    function initBuffer() {
+      let verticesTexCoords = new Float32Array([0.0, 0.0, 0.0]);
+      let n = verticesTexCoords.BYTES_PER_ELEMENT; // 指定顶点的个数
+      let vertexTexCoordBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
+      let FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
+      let a_Position = gl.getAttribLocation(gl.program, "a_Position");
+      let modelMatrix = glMatrix.mat4.create();
+
+      let u_Resolution = gl.getUniformLocation(gl.program, "u_resolution");
+      let resolution = glMatrix.vec2.create();
+      resolution[0] = 512.0;
+      resolution[1] = 512.0;
+      gl.uniform2fv(u_Resolution, resolution);
+
+      gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, FSIZE * 3, 0);
+      gl.enableVertexAttribArray(a_Position);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.drawArrays(gl.POINTS, 0, 1);
+
+      //打印小数
+      let aaa = readPixelReturnFloat(gl, [0, 0], [2, 2]);
+      //打印整数
+      // let aaa=  readPixelReturnInt(gl,[0,0],[2,2]);
+      console.log(aaa);
+    }
+  </script>
+
+  <body onload="main()">
+    <!-- <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script> -->
+    <canvas id="webgl" width="512" height="512"> </canvas>
+  </body>
+</html>
